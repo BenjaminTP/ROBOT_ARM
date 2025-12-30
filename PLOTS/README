@@ -1,0 +1,8 @@
+This folder contains some of the coolest plots from both python and matlab. 
+
+The most important of all these plots is the FULL_ARM_RANGE_PLOT, as it confirmed the validation function worked, ensuring the arm would not attempt to intersect with itself in any way.
+
+However, my favourite plot has to be 2DOF_POSSIBLE_COMBINATIONS_3D_PLOT. This plots all possible shoulder and elbow angle combinations on two axes (0,360), and then the corresponding distance the end of the 
+arm is away from a designated target in the third dimension. Just imaginging the possible solutions to a 2DOF robot arm, intuition tells us there should be two solutions, one where the arm bends down 
+and one where the arm bends up at the elbow joint. In order for a valid solution to appear on our 3D plot, the distance from the end of the arm to the target must be 0, and remembering that the the plot gives
+us a surface in 3D, there must be at most two places where the plot is equal to 0. Check out the image to see if our intuition lines up with the math.

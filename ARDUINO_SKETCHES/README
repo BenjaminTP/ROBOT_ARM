@@ -1,0 +1,1 @@
+This directory contains sketches that were used in the early prototyping stage. During this stage we used an Arduino Uno for its simplicity and familiarity, however later on we switched to and ESP32 for superior speed as well as its WiFi and Bluetooth capabilities.

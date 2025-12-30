@@ -1,0 +1,2 @@
+This single program not used for a sketch was made to test speed. We needed to make a decision whether or not to run the calculations run on the microcontroller or in the webapp we wanted to create. The C++ code beat python and matlab by a significant margin.
+

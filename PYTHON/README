@@ -1,0 +1,3 @@
+After writing the very first experimental IK in MATLAB, it was rewritten using python, specifically numpy and matplotlib to create some cool programs.
+
+Personally, my favourite is MOVEMENT_SIMULATION. Run it to see what happens!

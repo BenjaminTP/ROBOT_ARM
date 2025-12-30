@@ -1,0 +1,275 @@
+// Using an Arduino uno and the classic servo library, control the arm by receving keyboard inputs in the serial.
+// No smooth motion implmented
+#include <Arduino.h>
+#include <Servo.h>
+
+void execute_target();
+bool is_valid(float theta[]);
+void printStatus();
+
+const int yawServoPin = 3, servo1Pin = 5, servo2Pin = 6, servo3Pin = 9, gripperServoPin = 10; // Initialize servo pins
+const float TABLE = -98.08, L1 = 137.4, L2 = 85.8, L3 = 103.3, FOOT_LENGTH = 116.46, FOOT_HEIGHT = 15.2; // Initialize float constants
+const int INNER_HUB_RADIUS = 45, INNER_HUB_HEIGHT = 27; // Initialize int constants
+
+float target[2] = {115,100}, target_copy[2] = {0,0}, theta[3] = {0,0,0}, hand_theta = 0, yaw_angle = 90; 
+char direction = 'r';
+int invalid = 0;
+bool allowPrintStatus = false;
+
+Servo yawServo, servo1, servo2, servo3, gripperServo;
+
+void setup() {
+    Serial.begin(9600);
+    yawServo.attach(yawServoPin);
+    servo1.attach(servo1Pin);
+    servo2.attach(servo2Pin);
+    servo3.attach(servo3Pin);
+    gripperServo.attach(gripperServoPin);
+
+    // Set to home position
+    yawServo.write(90);
+    gripperServo.write(90);
+
+    execute_target();
+}
+
+void loop() {
+    if (Serial.available() > 0) {
+        direction = Serial.read();
+
+        // Using given keyboard inputs to control position and orientation
+        switch (direction) { 
+            case 'w': // Up
+                target[1] += 5;
+                execute_target();       
+                if (invalid == 1) {
+                    target[1] -= 5; // Undo if the result is invalid
+                }
+                break;
+            case 's': // Down
+                target[1] -= 5;
+                execute_target();
+                if (invalid == 1) {
+                    target[1] += 5;
+                }
+                break;
+            case 'a': // Left
+                target[0] -= 5;
+                execute_target();
+                if (invalid == 1) {
+                    target[0] += 5;
+                }
+                break;
+            case 'd': // Right
+                target[0] += 5;
+                execute_target();
+                if (invalid == 1) {
+                    target[0] -= 5;
+                }
+                break;
+            case '.': // Pitch down
+                hand_theta -= 5;
+                execute_target();
+                if (invalid == 1) {
+                    hand_theta += 5;
+                }
+                break;
+            case ',': // Pitch Up
+                hand_theta += 5;
+                execute_target();
+                if (invalid == 1) {
+                    hand_theta -= 5;
+                }
+                break;
+            case '[': // Yaw left
+                yaw_angle += 5;
+                if (yaw_angle < 0 || yaw_angle > 180) {
+                    yaw_angle -= 5;
+                } else {
+                    yawServo.write(yaw_angle);
+                }
+                printStatus();
+                break;
+            case ']': // Yaw Right
+                yaw_angle -= 5;
+                if (yaw_angle < 0 || yaw_angle > 180) {
+                    yaw_angle += 5;
+                } else {
+                    yawServo.write(yaw_angle);
+                }
+                printStatus();
+                break;
+            case 'c': // Close gripper
+                gripperServo.write(100);
+                break;
+            case 'o': // Open gripper
+                gripperServo.write(80);
+                break;
+            case 'k': // Stop gripper
+                gripperServo.write(90);
+                break;
+            case 'r': // Reset to home position
+                target[0] = 115;
+                target[1] = 100;
+                hand_theta = 0;
+                yaw_angle = 90;
+                gripperServo.write(90);
+                yawServo.write(yaw_angle);
+                execute_target();
+                break;
+            case '0': // Set to known positions to attach components
+                yaw_angle = 90;
+                gripperServo.write(90);
+                servo1.write(0);
+                servo2.write(0);
+                servo3.write(90);
+                yawServo.write(yaw_angle);
+                printStatus();
+                break;
+        }
+    }
+    delay(15);
+}
+
+
+void execute_target() {
+    hand_theta *=  M_PI / 180;
+    target_copy[0] = target[0];
+    target_copy[1] = target[1];
+    target[0] -= L3 * cos(hand_theta);
+    target[1] -= L3 * sin(hand_theta);
+    float r_target = sqrt(pow(target[0], 2) + pow(target[1], 2));
+    float theta_target = atan(target[1] / target[0]);
+
+    theta[1] = acos((pow(L1, 2) + pow(L2, 2) - pow(r_target, 2)) / (2 * L1 * L2));  // Cosine law
+    theta[0] = asin(sin(theta[1]) / r_target * L2) + theta_target;                  // Sine law
+    theta[1] = M_PI - theta[1];
+    theta[2] = M_PI / 2 + hand_theta + theta[1] - theta[0];
+
+    if (target[0] <= 0) {
+        theta[0] += M_PI;
+        theta[2] += M_PI;
+    }
+
+    if (theta[2] >= 2 * M_PI) {
+        theta[2] -= 2 * M_PI;
+    }
+
+    target[0] = target_copy[0];
+    target[1] = target_copy[1];
+
+    if (is_valid(theta)) {
+        // Move the arm if the target is in the range
+        for (int i = 0; i < 3; i++) { 
+            theta[i] *= 180 / M_PI;
+        }
+
+        hand_theta *=  180 / M_PI;
+
+        invalid = 0;
+
+        servo1.write(theta[0]);
+        servo2.write(theta[1]);
+        servo3.write(theta[2]);
+
+        printStatus();
+    } else {
+       Serial.println("Out of Range");
+       hand_theta *=  180 / M_PI;
+       invalid = 1;
+    }
+}
+
+
+bool is_valid(float theta[]) { // Validate if the angles will be in the range of the arm
+    if (isnan(theta[0]) || isnan(theta[1]) || isnan(theta[2])) {
+        return false;
+    }
+
+    // Check range of each motor
+    if (theta[0] > M_PI || theta[0] < 0) {
+        return false;
+    }
+
+    if (theta[1] >= M_PI || theta[1] < 0) {
+        return false;
+    }
+
+    if (theta[2] > M_PI || theta[2] < 0) {
+        return false;
+    }
+
+    // Calculating intersections of line segments
+    float x1, x2, x3, y1, y2, y3, a, b, c, alpha, beta;
+
+    x1 = L1 * cos(theta[0]); 
+    y1 = L1 * sin(theta[0]);
+
+    x2 = L2 * cos(theta[0] - theta[1]);
+    y2 = L2 * sin(theta[0] - theta[1]);
+
+    x3 = L3 * cos(theta[0] - theta[1] + theta[2] - M_PI/2);
+    y3 = L3 * sin(theta[0] - theta[1] + theta[2] - M_PI/2);
+
+    float v1[2] = {0,0}, v2[2] = {x1,y1}, v3[2] = {x1 + x2, y1 + y2}, v4[2] = {x1 + x2 + x3, y1 + y2 + y3};
+
+    a = (v4[0]-v3[0])*(v3[1]-v1[1])-(v4[1]-v3[1])*(v3[0]-v1[0]);
+    b = (v4[0]-v3[0])*(v2[1]-v1[1])-(v4[1]-v3[1])*(v2[0]-v1[0]);
+    c = (v2[0]-v2[0])*(v3[1]-v1[1])-(v2[1]-v1[1])*(v3[0]-v1[0]);
+
+    if (b == 0 || (a == 0 && b == 0)) {
+        return false;
+    }
+
+    alpha = a / b;
+    beta = c / b;
+
+    if (alpha >= -0.1 && alpha <= 1.1 && beta >= -0.1 && beta <= 1.1) {
+        return false;
+    }
+
+    // Calculating intersection with base
+    if (v4[1] <= TABLE || v3[1] <= TABLE || v2[1] <= TABLE) { 
+        return false;
+    }
+
+    if (v4[0] <= FOOT_LENGTH && v4[0] >= -FOOT_LENGTH && v4[1] <= TABLE + FOOT_HEIGHT) {
+        return false;
+    }
+
+    if (v4[0] <= INNER_HUB_RADIUS && v4[0] >= -INNER_HUB_RADIUS && v4[1] <= INNER_HUB_HEIGHT) {
+        return false;
+    }
+
+    if (v4[0] <= 0 && v4[0] >= -150 && v4[1] <= 10) {
+        return false;
+    }
+
+    return true;
+}
+
+
+void printStatus() { // Printing all values of each motor
+    if (allowPrintStatus) {
+        Serial.print("Servo 1 angle = ");
+        Serial.print(theta[0]);
+        Serial.print(" | ");
+        Serial.print("Servo 2 angle = ");
+        Serial.print(theta[1]);
+        Serial.print(" | ");
+        Serial.print("Servo 3 angle = ");
+        Serial.print(theta[2]);
+        Serial.print(" | ");
+        Serial.print("Target = ");
+        Serial.print(target[0]);
+        Serial.print(", ");
+        Serial.print(target[1]);
+        Serial.print(" | ");
+        Serial.print("Hand Angle = ");
+        Serial.print(hand_theta);
+        Serial.print(" | ");
+        Serial.print("Yaw Angle = ");
+        Serial.println(yaw_angle);
+    }
+}
+

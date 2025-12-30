@@ -1,0 +1,3 @@
+This is where it began. Each file contains a comment explaining the functionality of each program. 
+
+If you're wondering where ARM_MATLAB_CODE_1.m went, it was about 2-3 orders of magnitude slower than the slowest calculations on this entire project.
