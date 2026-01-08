@@ -1,7 +1,4 @@
-This is the main ESP32 and PCA9685 sketch. In hopes of possibly continuing with this project
-in the future, I have simplified the sketch significantly, by using multiple header files to handle
-different aspects of the robots arm, whether it be calculating IK, smoothing arm movements, or
-just the html for the UI.
+This is the main ESP32 and PCA9685 sketch. In hopes of possibly continuing with this project in the future, I have simplified the sketch significantly, by using multiple header files to handle
+different aspects of the robots arm, whether it be calculating IK, smoothing arm movements, or just the html for the UI.
 
-To operate this code, upload it and look st the serial to get the IP address. Paste this into
-your browser and you're done!
+To operate this code, upload it and look at the serial to get the IP address. Then connect to the wifi networks called "ESP32_Robot_Arm". Finally, paste this into your browser and you're done!
