@@ -10,11 +10,16 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
 <title>Robot Arm 2.0</title>
 
 <style>
-  body {
-    font-family: Arial, sans-serif;
+  html, body {
+    height: 100%;
+    margin: 0;
+    overscroll-behavior: none;
     background: #111;
     color: #eee;
-    margin: 0;
+    font-family: Arial, sans-serif;
+  }
+
+  body {
     padding: 15px;
   }
 
@@ -28,6 +33,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
     flex-direction: column;
     align-items: center;
     gap: 20px;
+    min-height: 100vh;
   }
 
   .panel {
@@ -50,8 +56,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
     font-size: 16px;
     user-select: none;
     -webkit-user-select: none;
-    -webkit-touch-callout: none;
-    touch-action: none; /* CRITICAL: prevents touch → mouse double events */
+    touch-action: none; /* CRITICAL: prevents mobile double-fire */
   }
 
   button:active {
@@ -89,12 +94,55 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
     color: #000;
   }
 
+  /* Desktop / tablet */
   @media (min-width: 900px) {
     .main {
       flex-direction: row;
       flex-wrap: wrap;
       justify-content: center;
       align-items: flex-start;
+    }
+  }
+
+  /* Phone landscape */
+  @media (orientation: landscape) and (max-height: 500px) {
+    body {
+      padding: 8px;
+    }
+
+    h1 {
+      display: none;
+    }
+
+    .main {
+      flex-direction: row;
+      flex-wrap: nowrap;
+      height: 100%;
+      gap: 10px;
+    }
+
+    .panel {
+      padding: 10px;
+    }
+
+    button {
+      font-size: 18px;
+      padding: 16px 22px;
+    }
+
+    .dpad {
+      grid-template-columns: 70px 70px 70px;
+      grid-template-rows: 70px 70px 70px;
+      gap: 8px;
+    }
+
+    .stack {
+      gap: 12px;
+    }
+
+    .functions {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
     }
   }
 </style>
@@ -199,4 +247,5 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
 
 </body>
 </html>
+
 )rawliteral";
