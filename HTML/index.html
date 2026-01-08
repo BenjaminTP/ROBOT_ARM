@@ -8,11 +8,16 @@
 <title>Robot Arm 2.0</title>
 
 <style>
-  body {
-    font-family: Arial, sans-serif;
+  html, body {
+    height: 100%;
+    margin: 0;
+    overscroll-behavior: none;
     background: #111;
     color: #eee;
-    margin: 0;
+    font-family: Arial, sans-serif;
+  }
+
+  body {
     padding: 15px;
   }
 
@@ -26,6 +31,7 @@
     flex-direction: column;
     align-items: center;
     gap: 20px;
+    min-height: 100vh;
   }
 
   .panel {
@@ -48,7 +54,7 @@
     font-size: 16px;
     user-select: none;
     -webkit-user-select: none;
-    -webkit-touch-callout: none;
+    touch-action: none; /* CRITICAL: prevents mobile double-fire */
   }
 
   button:active {
@@ -86,12 +92,55 @@
     color: #000;
   }
 
+  /* Desktop / tablet */
   @media (min-width: 900px) {
     .main {
       flex-direction: row;
       flex-wrap: wrap;
       justify-content: center;
       align-items: flex-start;
+    }
+  }
+
+  /* Phone landscape */
+  @media (orientation: landscape) and (max-height: 500px) {
+    body {
+      padding: 8px;
+    }
+
+    h1 {
+      display: none;
+    }
+
+    .main {
+      flex-direction: row;
+      flex-wrap: nowrap;
+      height: 100%;
+      gap: 10px;
+    }
+
+    .panel {
+      padding: 10px;
+    }
+
+    button {
+      font-size: 18px;
+      padding: 16px 22px;
+    }
+
+    .dpad {
+      grid-template-columns: 70px 70px 70px;
+      grid-template-rows: 70px 70px 70px;
+      gap: 8px;
+    }
+
+    .stack {
+      gap: 12px;
+    }
+
+    .functions {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
     }
   }
 </style>
@@ -107,53 +156,48 @@
     <h2>Movement</h2>
     <div class="dpad">
       <button class="up"
-        onmousedown="press('FORWARD')" onmouseup="release()"
-        ontouchstart="press('FORWARD')" ontouchend="release()" ontouchcancel="release()">↑</button>
+        onpointerdown="press('FORWARD')"
+        onpointerup="release()"
+        onpointercancel="release()">↑</button>
 
       <button class="left"
-        onmousedown="press('LEFT')" onmouseup="release()"
-        ontouchstart="press('LEFT')" ontouchend="release()" ontouchcancel="release()">←</button>
+        onpointerdown="press('LEFT')"
+        onpointerup="release()"
+        onpointercancel="release()">←</button>
 
       <button class="right"
-        onmousedown="press('RIGHT')" onmouseup="release()"
-        ontouchstart="press('RIGHT')" ontouchend="release()" ontouchcancel="release()">→</button>
+        onpointerdown="press('RIGHT')"
+        onpointerup="release()"
+        onpointercancel="release()">→</button>
 
       <button class="down"
-        onmousedown="press('BACKWARD')" onmouseup="release()"
-        ontouchstart="press('BACKWARD')" ontouchend="release()" ontouchcancel="release()">↓</button>
+        onpointerdown="press('BACKWARD')"
+        onpointerup="release()"
+        onpointercancel="release()">↓</button>
     </div>
   </section>
 
   <section class="panel">
     <h2>Vertical</h2>
     <div class="stack">
-      <button onmousedown="press('UP')" onmouseup="release()"
-              ontouchstart="press('UP')" ontouchend="release()" ontouchcancel="release()">Up</button>
-
-      <button onmousedown="press('DOWN')" onmouseup="release()"
-              ontouchstart="press('DOWN')" ontouchend="release()" ontouchcancel="release()">Down</button>
+      <button onpointerdown="press('UP')" onpointerup="release()" onpointercancel="release()">Up</button>
+      <button onpointerdown="press('DOWN')" onpointerup="release()" onpointercancel="release()">Down</button>
     </div>
   </section>
 
   <section class="panel">
     <h2>Pitch</h2>
     <div class="stack">
-      <button onmousedown="press('PITCHUP')" onmouseup="release()"
-              ontouchstart="press('PITCHUP')" ontouchend="release()" ontouchcancel="release()">Pitch +</button>
-
-      <button onmousedown="press('PITCHDOWN')" onmouseup="release()"
-              ontouchstart="press('PITCHDOWN')" ontouchend="release()" ontouchcancel="release()">Pitch -</button>
+      <button onpointerdown="press('PITCHUP')" onpointerup="release()" onpointercancel="release()">Pitch +</button>
+      <button onpointerdown="press('PITCHDOWN')" onpointerup="release()" onpointercancel="release()">Pitch -</button>
     </div>
   </section>
 
   <section class="panel">
     <h2>Gripper</h2>
     <div class="stack">
-      <button onmousedown="press('OPEN')" onmouseup="release()"
-              ontouchstart="press('OPEN')" ontouchend="release()" ontouchcancel="release()">Open</button>
-
-      <button onmousedown="press('CLOSE')" onmouseup="release()"
-              ontouchstart="press('CLOSE')" ontouchend="release()" ontouchcancel="release()">Close</button>
+      <button onpointerdown="press('OPEN')" onpointerup="release()" onpointercancel="release()">Open</button>
+      <button onpointerdown="press('CLOSE')" onpointerup="release()" onpointercancel="release()">Close</button>
     </div>
   </section>
 
