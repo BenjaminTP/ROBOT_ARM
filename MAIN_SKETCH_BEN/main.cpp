@@ -8,13 +8,14 @@
 #include "arm_calculations.h"
 
 /* 
-Your SSID and Password to be put here. 
+Connect to the ESP32 in your WiFi settings. The name is "ESP32_Robot_Arm" 
 Once the code is uploaded to the ESP32, check the serial for the IP address.
 Paste this address into your browser to access the controls. Usable on any device that has a browser. 
 */
 
-String ssid = "YOUR_SSID";
-String password = "YOUR_PASSWORD";
+const char* ap_ssid = "ESP32_Robot_Arm";
+const char* ap_password = "12345678";
+
 
 // Constants that are used when moving the arm
 struct MovementConstants {
@@ -43,18 +44,22 @@ void setup() {
   Wire.begin(21,22);
   pwm.begin();
   pwm.setPWMFreq(50);
-  WiFi.begin(ssid, password);
+  WiFi.mode(WIFI_AP);
+  WiFi.softAP(ap_ssid, ap_password);
 
-  Serial.print("IP: ");
-  Serial.println(WiFi.localIP());
+  IPAddress IP = WiFi.softAPIP();
+  Serial.print("AP IP address: ");
+  Serial.println(IP);
+
   server.begin();
+
 
   // Initial conditions
   homePosition.targetX = 150, homePosition.targetY = 100, homePosition.yawAngle = 90, homePosition.wristPitch = 0;
   lastPosition = currentPosition = homePosition;
-  position1.targetX = 275, position1.targetY = -40, position1.yawAngle = 140, position1.wristPitch = 0;
+  position1.targetX = 150, position1.targetY = 115, position1.yawAngle = 10, position1.wristPitch = -20;
   position2.targetX = 155, position2.targetY = -20, position2.yawAngle = 90, position2.wristPitch = -100;
-  position3.targetX = 170, position3.targetY = -65, position3.yawAngle = 180, position3.wristPitch = -100;
+  position3.targetX = 15, position3.targetY = 310, position3.yawAngle = 150, position3.wristPitch = 90;
   position4.targetX = 150, position4.targetY = 235, position4.yawAngle = 30, position4.wristPitch = 20;
 
   stopGripper();
@@ -169,4 +174,3 @@ void functionMovementButtonPressed(Position &position) {
     currentPosition = position;
   }
 }
-
