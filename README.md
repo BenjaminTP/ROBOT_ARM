@@ -8,3 +8,5 @@ This is the repository containing most of the files created during the building 
 To help guide you through this repository, most directories have a seperate short README to give context to the files in that directory, additionally, most files have a comment at the top of the file with explanation of the function of that file specifically.
 
 Note that if any AI was used, it has been explicitly acknowledged in the code.
+
+Link to Andrew Bai's code repository: https://github.com/andrewjbai-stack/RobotArm
