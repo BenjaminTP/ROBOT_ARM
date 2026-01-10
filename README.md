@@ -1,4 +1,4 @@
-# ROBOT_ARM_2.0
+# ROBOT_ARM
 This is the code to our 4DOF robot arm! Made by Andrew Bai, Gabe Tirona, and Benjamin Tran-Pugh.
 
 The main files for this project are in the MAIN_SKETCH directory, and contain full inverse kinematics, a WiFi server, smoothed robotic motion that can be sped up or slowed down, and predetermined positions that can also be overwritten with the save button.
